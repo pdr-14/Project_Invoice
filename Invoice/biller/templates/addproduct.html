@@ -1,0 +1,174 @@
+{%extends "layout.html"%}
+{% load static %}
+{%block title%}Add Product{%endblock%}
+{%block content%}
+    <style>
+     .productlist{
+        overflow: auto;
+     }
+   </style>
+   <div class="container mb-5 mt-5">
+            <h1 class="mb-4">Product Management</h2>
+            <div class="row">
+                <div class="col-12 col-md-6 mb-3">
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <h5 class="card-title m-3 fw-bold">Add New Product</h5>
+                            <form class="mt-3"  id="addproductform" method="POST" >
+                                {% csrf_token %}
+                                <div class="mt-3 mb-5">
+                                    <label for="Productname" class="form-label mx-2 text-muted">Product Name</label>
+                                    <div class="position-relative">
+                                            <div class=" position-absolute top-50 start-0 translate-middle-y ms-2 text-muted">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/></svg>
+                                            </div>
+                                    <input id="Productname" name="name" type="text" class="form-control pb-3" placeholder="Enter product name" required>
+                                    </div>
+                                    <label for="HSNcode" class="form-label mx-2 mt-2 text-muted">HSN Code</label>
+                                    <input id="HSNcode" name="hsn" type="text" class="form-control pb-3">
+                                    <div class="row">
+                                        <div class="col-sm-10 col-md-6 mt-2">
+                                            <label class="from-label mx-2 text-muted">GST Rate (%)</label>
+                                                <select class="form-select mt-2 pb-2" name="gst">
+                                                    <option value="5">5%</option>
+                                                    <option value="12">12%</option>
+                                                    <option value="18">18%</option>
+                                                </select>
+                                        </div>
+                                        <div class="col-sm-10 col-md-6 mt-2">
+                                                <label for="Unit_Price" class="form-label mx-2 text-muted">Unit Price</label>
+                                                <input id="Unit_Price" type="number" class="form-control pb-2" name="price" required>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-10 col-md-6 mt-2">
+                                                <label for="Stock_qty" class="form-label mx-2 text-muted">Stock Quantity</label>
+                                                <input id="Stock_qty" type="number" class="form-control pb-2" name="stock" required>
+                                        </div>
+                                      <div class="col-sm-10 col-md-6 mt-2">
+                                            <label class="from-label mx-2 text-muted">Unit</label>
+                                                <select class="form-select mt-2 pb-2" name="unit" id="type">
+                                                    <option value="piece">Piece</option>
+                                                    <option value="packets">Packets</option>
+                                                </select>
+                                        </div>
+                                        <div class="mt-2" style="display:none;" id="piecesdata">
+                                             <label class="from-label mx-2 text-muted">Piece In Packets</label>
+                                             <input type="text" class="form-control mt-2" name="pieces_in_packets" placeholder="Enter The value">
+                                        </div>
+
+                                        
+                                    </div>
+                                </div>
+                                <button id="addbtn" class="btn btn-primary w-100" type="submit">Add Product</button>
+                            </form>
+                        </div>
+                    </div>
+                 </div>
+                <div class="col-12 col-md-6">   
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <h5 class="card-title m-3 fw-bold">Product List</h5>
+                            <div id="productholder">
+                            {% include "addproduct/productcard.html" with productlist=productlist %}
+                            </div>
+                    </div>
+                </div>
+              
+            </div>
+        </div>  
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'js/jquery-3.6.0.js' %}"></script>
+<script>
+        $("#type").on("change",function(e){
+            var value=$("#type").val();
+            if(value==="packets")
+            {
+                document.getElementById("piecesdata").style.display="block";
+            }
+            else{
+                document.getElementById("piecesdata").style.display="none";
+            }
+        });
+        var value=$("#type").val();
+            if(value==="packets")
+            {
+                document.getElementById("piecesdata").style.display="block";
+            }
+            else{
+                document.getElementById("piecesdata").style.display="none";
+            }
+        $("#addproductform").on("submit", function (e) {
+            e.preventDefault(); // Prevent the default form submission
+             $.ajax({
+                    type: "POST",
+                    url: "{% url 'Add Product' %}",
+                    data: $(this).serialize(), // 'this' refers to the form
+                    
+                    success: function (response) {
+                                Swal.fire({
+                                    title: 'Success',
+                                    text: response.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                });
+                                $("#addproductform")[0].reset(); // Optional: reset the form after success
+                                $("#productholder").html(response.html); 
+                                document.getElementById("piecesdata").style.display="none";
+                            },
+                    error: function (xhr, status, error) {
+                            Swal.fire({
+                                    title: 'Error',
+                                    text: 'An error occurred while adding the product.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                     });
+                            }
+                    });
+            });
+            $(document).on('click','.btn-danger',function(e){
+                    e.preventDefault();
+                    const name=$(this).data('name');
+                    Swal.fire({
+                        title: `Are You Sure?`,
+                        text: `You want to delete ${name} product?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d63030ff',
+                        cancelButtonColor: 'green',
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'No'
+                    }).then((result)=> {
+                            if(result.isConfirmed)
+                            {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url 'Delete Product' %}",
+                                    data: {
+                                        'name': name,
+                                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                                    },
+                                    success: function (response) {
+                                        Swal.fire({
+                                            title: 'Deleted',
+                                            text: response.message,
+                                            icon: 'success',
+                                            confirmButtonText: 'OK'
+                                        });
+                                        $("#productholder").html(response.html); 
+                                    },
+                                    error: function (xhr, status, error) {
+                                        Swal.fire({
+                                            title: 'Error',
+                                            text: 'An error occurred while deleting the product.',
+                                            icon: 'error',
+                                            confirmButtonText: 'OK'
+                                        });
+                                    }
+                                });
+                            }
+                    });
+            });
+        
+</script>
+{%endblock%}
