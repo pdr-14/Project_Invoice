@@ -21,18 +21,23 @@ def addproduct(request):
         piece=request.POST.get('pieces_in_packets', 0)
         if(piece == ''):
             piece = 0
-        Product.objects.create(
-             name=name,
-             hsn=request.POST.get('hsn'),
-             gst=request.POST.get('gst'),
-             price=request.POST.get('price'),
-             stock=request.POST.get('stock'),
-             unit=request.POST.get('unit'),
-             pieces_in_packets=float(request.POST.get('stock'))*float(piece)  # Default to 0 if not provided 
-         )
-        product_details = Product.objects.all()
-        cardview=render_to_string('addproduct/productcard.html', {'productlist': product_details})
-        return JsonResponse({"status": "success", "message": f"Product {name} added successfully!","html": cardview})
+        if Product.objects.filter(name=name).exists():
+            product_details = Product.objects.all()
+            cardview=render_to_string('addproduct/productcard.html', {'productlist': product_details})
+            return JsonResponse({"status": "error", "message": f"Given Product {name} already exists!","html": cardview})
+        else:
+            Product.objects.create(
+                 name=name,
+                hsn=request.POST.get('hsn'),
+                gst=request.POST.get('gst'),
+                price=request.POST.get('price'),
+                stock=request.POST.get('stock'),
+                unit=request.POST.get('unit'),
+                 pieces_in_packets=float(request.POST.get('stock'))*float(piece)  # Default to 0 if not provided 
+            )
+            product_details = Product.objects.all()
+            cardview=render_to_string('addproduct/productcard.html', {'productlist': product_details})
+            return JsonResponse({"status": "success", "message": f"Product {name} added successfully!","html": cardview})
         
     else:
         product_details=Product.objects.all()

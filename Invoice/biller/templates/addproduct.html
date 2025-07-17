@@ -106,20 +106,27 @@
                     data: $(this).serialize(), // 'this' refers to the form
                     
                     success: function (response) {
+                                // If the product is added successfully, show success message
+                                let iconType = response.message.includes("already") ? 'error' : 'success';
+                                let textType = response.message.includes("already") ? 'Product already exists' : 'success';
                                 Swal.fire({
-                                    title: 'Success',
+                                    title: textType,
                                     text: response.message,
-                                    icon: 'success',
+                                    icon: iconType,
                                     confirmButtonText: 'OK'
                                 });
-                                $("#addproductform")[0].reset(); // Optional: reset the form after success
-                                $("#productholder").html(response.html); 
-                                document.getElementById("piecesdata").style.display="none";
+                                if(textType === 'success')
+                                {
+                                        $("#addproductform")[0].reset(); // Optional: reset the form after success
+                                        $("#productholder").html(response.html); 
+                                        document.getElementById("piecesdata").style.display="none";
+                                }
+                                
                             },
                     error: function (xhr, status, error) {
                             Swal.fire({
                                     title: 'Error',
-                                    text: 'An error occurred while adding the product.',
+                                    text: `An error[${error.message}] occurred while adding the product.`,
                                     icon: 'error',
                                     confirmButtonText: 'OK'
                                      });
