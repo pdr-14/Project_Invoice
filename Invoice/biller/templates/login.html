@@ -1,0 +1,34 @@
+{% load static %}
+<html>
+    <head>
+        <title>Welcome</title>
+        <link href="{% static "css//bootstrap.min.css"%}" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container d-flex justify-content-center align-items-center vh-100">
+        
+        <div class="card col-sm-10 col-md-6 col-lg-5 shadow">
+            <div class="card-title">
+                    <h3 class="card-text text-center mt-5">Welcome To The Login Page</h1>
+                </div>
+            <div class="card-body">
+                <div class="col-10 form-floating mb-3 mx-auto">
+                   
+                    <input type="text" class="col-5 form-control" id="username" placeholder="Enter Your Username"/>
+                     <label for="username">Username</label>
+                </div>
+                <div class="col-10 form-floating mb-3 mx-auto">
+                   
+                    <input type="password" class="col-5 form-control" id="password" placeholder="Enter Your Username"/>
+                     <label for="password">Password</label>
+                </div>
+                <div class="d-flex justify-content-center rounded rounded-pill align-items-center mt-5 mb-4">
+                <button class="btn btn-success w-75 ">Sign In</button>
+                </div>
+            </div>
+        </div>
+        </div>
+    
+        
+    </body>
+</html>
