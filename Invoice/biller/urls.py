@@ -5,6 +5,8 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='Dashboard'),
     path('addproduct/',views.addproduct,name="Add Product"),
     path('deleteproduct/',views.deleteproduct,name="Delete Product"),
-    
+    path('addcustomer/',views.addcustomer,name="Add Customer"),
+    path('editproduct/',views.editproduct,name="Edit Product"),
+    path('Login/',views.login,name="Login")    
     # Add more URL patterns as needed
 ]

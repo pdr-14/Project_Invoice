@@ -29,7 +29,7 @@
                                     <div class="row">
                                         <div class="col-sm-10 col-md-6 mt-2">
                                             <label class="from-label mx-2 text-muted">GST Rate (%)</label>
-                                                <select class="form-select mt-2 pb-2" name="gst">
+                                                <select class="form-select mt-2 pb-2" id="gst" name="gst">
                                                     <option value="5">5%</option>
                                                     <option value="12">12%</option>
                                                     <option value="18">18%</option>
@@ -54,7 +54,7 @@
                                         </div>
                                         <div class="mt-2" style="display:none;" id="piecesdata">
                                              <label class="from-label mx-2 text-muted">Piece In Packets</label>
-                                             <input type="text" class="form-control mt-2" name="pieces_in_packets" placeholder="Enter The value">
+                                             <input type="text" class="form-control mt-2" id="pieces" name="pieces_in_packets" placeholder="Enter The value">
                                         </div>
 
                                         
@@ -100,40 +100,62 @@
             }
         $("#addproductform").on("submit", function (e) {
             e.preventDefault(); // Prevent the default form submission
-             $.ajax({
-                    type: "POST",
-                    url: "{% url 'Add Product' %}",
-                    data: $(this).serialize(), // 'this' refers to the form
-                    
-                    success: function (response) {
-                                // If the product is added successfully, show success message
-                                let iconType = response.message.includes("already") ? 'error' : 'success';
-                                let textType = response.message.includes("already") ? 'Product already exists' : 'success';
+            let addbtntext=$("#addbtn").text();
+            if(addbtntext=="Add Product")
+            {
+                $.ajax({
+                        type: "POST",
+                        url: "{% url 'Add Product' %}",
+                        data: $(this).serialize(), // 'this' refers to the form
+                        
+                        success: function (response) {
+                                    // If the product is added successfully, show success message
+                                    let iconType = response.message.includes("already") ? 'error' : 'success';
+                                    let textType = response.message.includes("already") ? 'Product already exists' : 'success';
+                                    Swal.fire({
+                                        title: textType,
+                                        text: response.message,
+                                        icon: iconType,
+                                        confirmButtonText: 'OK'
+                                    });
+                                    if(textType === 'success')
+                                    {
+                                            $("#addproductform")[0].reset(); // Optional: reset the form after success
+                                            $("#productholder").html(response.html); 
+                                            document.getElementById("piecesdata").style.display="none";
+                                    }
+                                    
+                                },
+                        error: function (xhr, status, error) {
                                 Swal.fire({
-                                    title: textType,
-                                    text: response.message,
-                                    icon: iconType,
-                                    confirmButtonText: 'OK'
-                                });
-                                if(textType === 'success')
-                                {
-                                        $("#addproductform")[0].reset(); // Optional: reset the form after success
-                                        $("#productholder").html(response.html); 
-                                        document.getElementById("piecesdata").style.display="none";
+                                        title: 'Error',
+                                        text: `An error[${error.message}] occurred while adding the product.`,
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                        });
                                 }
-                                
-                            },
-                    error: function (xhr, status, error) {
-                            Swal.fire({
-                                    title: 'Error',
-                                    text: `An error[${error.message}] occurred while adding the product.`,
-                                    icon: 'error',
-                                    confirmButtonText: 'OK'
-                                     });
-                            }
+                        });
+                }
+                else if(addbtntext=="Update Product"){
+                    $.ajax({
+                        type: "POST",
+                        url: "/editproduct/",
+                        data: $(this).serialize(), // 'this' refers to the form
+                        success: function (response) {
+                            Swal.fire({title:"Added successfully",text:response.message,icon:'success',confirmButtonText:"Ok"});
+                            $("#addproductform")[0].reset(); // Optional: reset the form after success
+                            $("#productholder").html(response.html); 
+                            document.getElementById("piecesdata").style.display="none";
+                        },
+                        error:function(xhr,status,error){
+                            Swal.fire({title:"Error",text:error.message,icon:'error',confirmButtonText:"Close"});
+                        }
                     });
-            });
-            $(document).on('click','.btn-danger',function(e){
+                }
+        });
+
+        //for deletion button
+        $(document).on('click','.btn-danger',function(e){
                     e.preventDefault();
                     const name=$(this).data('name');
                     Swal.fire({
@@ -175,7 +197,47 @@
                                 });
                             }
                     });
-            });
-        
+        });
+        // for edit button
+        $(document).on('click','.btn-info',function(e){
+                e.preventDefault();
+                const name=$(this).data('name');
+                $.ajax(
+                    {
+                        url:'/editproduct/',
+                        type:"GET",
+                        data:{
+                            'name': name,
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success:function(response){
+                            $("#Productname").val(response.product.name);
+                            $("#HSNcode").val(response.product.hsn);
+                            $("#gst").val(response.product.gst);
+                            $("#Unit_Price").val(response.product.price);
+                            $("#Stock_qty").val(response.product.stock);
+                            $("#type").val(response.product.unit);
+                            var value=$("#type").val();
+                            if(value==="packets")
+                            {
+                                    document.getElementById("piecesdata").style.display="block";
+                                    let pieces=response.product.each_piece_in_packets??0;
+                                    $("#pieces").val(pieces);
+                                
+                            }
+                            else{
+                                     document.getElementById("piecesdata").style.display="none";
+
+                            }
+                            $("#addbtn").text("Update Product");
+
+                        },
+                        error:function(xhr,error,status)
+                        {
+                            Swal.fire({title:"Error",text:"Error Message:"+status,icon:"error",confirmButtonColor:'red',confirmButtonText:"Close"});
+                            $("#addbtn").text("Add Product");
+                        }
+                    });
+        });
 </script>
 {%endblock%}

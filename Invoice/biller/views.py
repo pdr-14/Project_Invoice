@@ -2,38 +2,48 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render,redirect
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from .models import Product
+from .models import Product,productloggin
 from django.template.loader import render_to_string
+import datetime
+
+
 # Create your views here.
+def login(request):
+    return render(request,"login.html")
 def home(request):
     return HttpResponse("Hello Word")
+@login_required
 def dashboard(request):
     customer=150
     sales=200
-    products=100
-    return render(request,'dashboard.html',{'customer':customer, 'sales':sales, 'products':products})
+    products=100         
+    return render(request,'dashboard.html',{'css/bootstrap.min.css" rel="stylesheet" integrity=ustomer':customer, 'sales':sales, 'products':products})
 @require_http_methods(["GET", "POST"])
 def addproduct(request):
     if request.method == 'POST':
+        print("In the Add Product Post")
         name=request.POST.get('name')
         piece=request.POST.get('pieces_in_packets', 0)
         if(piece == ''):
             piece = 0
+        #checking product is present or not
         if Product.objects.filter(name=name).exists():
             product_details = Product.objects.all()
             cardview=render_to_string('addproduct/productcard.html', {'productlist': product_details})
             return JsonResponse({"status": "error", "message": f"Given Product {name} already exists!","html": cardview})
         else:
             Product.objects.create(
-                 name=name,
+                name=name,
                 hsn=request.POST.get('hsn'),
                 gst=request.POST.get('gst'),
                 price=request.POST.get('price'),
                 stock=request.POST.get('stock'),
                 unit=request.POST.get('unit'),
-                 pieces_in_packets=float(request.POST.get('stock'))*float(piece)  # Default to 0 if not provided 
+                each_piece_in_packets=float(piece),
+                pieces_in_packets=float(request.POST.get('stock'))*float(piece)  # Default to 0 if not provided 
             )
             product_details = Product.objects.all()
             cardview=render_to_string('addproduct/productcard.html', {'productlist': product_details})
@@ -42,10 +52,12 @@ def addproduct(request):
     else:
         product_details=Product.objects.all()
         return render(request,'addproduct.html',{"productlist":product_details})
+
 @require_http_methods(["GET", "POST"])
 def deleteproduct(request):
     if request.method == 'POST':
         product_id = request.POST.get('name')
+        product_id
         try:
             product = Product.objects.get(name=product_id)
             product.delete()
@@ -64,3 +76,50 @@ def deleteproduct(request):
     else:
         product_details=Product.objects.all()
         return render(request,'addproduct.html',{"productlist":product_details})
+@require_http_methods(["GET", "POST"])
+def editproduct(request):
+    if request.method=="GET":
+        name=request.GET.get('name')
+        if name==None:
+            product_details=Product.objects.all()
+            return render(request,'addproduct.html',{"productlist":product_details})
+        else:
+            product=Product.objects.get(name=name)
+            product_details ={
+            'name': product.name,
+            'hsn': product.hsn,
+            'gst': product.gst,
+            'price': product.price,
+            'stock': product.stock,
+            'unit': product.unit,
+            'each_piece_in_packets': product.each_piece_in_packets,
+            'pieces_in_packets': product.pieces_in_packets
+            }
+        return JsonResponse({"status":"success","product":product_details})
+    elif request.method=="POST":
+        name=request.POST.get('name')
+        if(Product.objects.filter(name=name).exists()):
+            piece=request.POST.get('pieces_in_packets', 0)
+            if(piece == ''):
+                piece = 0
+            product_update=Product.objects.get(name=name)
+            product_update.name=name
+            product_update.hsn=request.POST.get('hsn')
+            product_update.gst=request.POST.get('gst')
+            product_update.price=request.POST.get('price')
+            product_update.stock=request.POST.get('stock')
+            product_update.unit=request.POST.get('unit')
+            product_update.each_piece_in_packets=float(piece)
+            product_update.pieces_in_packets=float(request.POST.get('stock'))*float(piece)
+            product_update.save()
+            product_details=Product.objects.all()
+            cardview=render_to_string('addproduct/productcard.html', {'productlist': product_details})
+            return JsonResponse({"status":"success","message":f"Product {name} updated successfully","html":cardview})
+        else:
+            return JsonResponse({"status":"error","message":f"Product {name} is not found"})
+    else:
+        return JsonResponse({"status":"error","message":"Invalid request method."})
+    
+@require_http_methods(["GET","POST"])
+def addcustomer(request):
+    return render(request,"addcustomer.html")
