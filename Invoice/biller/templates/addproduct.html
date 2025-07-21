@@ -8,11 +8,11 @@
      }
    </style>
    <div class="container mb-5 mt-5">
-            <h1 class="mb-4">Product Management</h2>
+            <h1 class="mb-4 text-light">Product Management</h2>
             <div class="row">
                 <div class="col-12 col-md-6 mb-3">
-                    <div class="card shadow-lg">
-                        <div class="card-body">
+                    <div class="card shadow-lg bg-transparent border-0">
+                        <div class="card-body shadow-lg">
                             <h5 class="card-title m-3 fw-bold">Add New Product</h5>
                             <form class="mt-3"  id="addproductform" method="POST" >
                                 {% csrf_token %}
@@ -56,18 +56,24 @@
                                              <label class="from-label mx-2 text-muted">Piece In Packets</label>
                                              <input type="text" class="form-control mt-2" id="pieces" name="pieces_in_packets" placeholder="Enter The value">
                                         </div>
-
+                                    
                                         
                                     </div>
+                                    
                                 </div>
-                                <button id="addbtn" class="btn btn-primary w-100" type="submit">Add Product</button>
+                                <div class="row">
+                                        <div class="col-12 d-flex justify-content-evenly">
+                                            <button id="addbtn" class="btn btn-purple" style="width:150px;" type="submit">Add Product</button>
+                                            <button id="clearbtn" class="btn" style="background-color:red;color:white;width:150px;" type="button">Clear</button>
+                                        </div>
+                                    </div>
                             </form>
                         </div>
                     </div>
                  </div>
                 <div class="col-12 col-md-6">   
-                    <div class="card shadow-lg">
-                        <div class="card-body">
+                    <div class="card bg-transparent border-0 shadow-lg">
+                        <div class="card-body shadow-lg">
                             <h5 class="card-title m-3 fw-bold">Product List</h5>
                             <div id="productholder">
                             {% include "addproduct/productcard.html" with productlist=productlist %}
@@ -80,6 +86,19 @@
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
 <script src="{% static 'js/jquery-3.6.0.js' %}"></script>
 <script>
+        function Clear()
+        {
+             $('input[type="text"]').val('');
+            // Reset all select elements to the first option
+            $('select').prop('selectedIndex', 0);
+            $('input[type="number"]').val('');
+            document.getElementById("piecesdata").style.display="none";
+            $("#addbtn").text("Add Product");
+        }
+        $("#clearbtn").on("click",function(e){
+            e.preventDefault();
+            Clear();
+        });
         $("#type").on("change",function(e){
             var value=$("#type").val();
             if(value==="packets")
@@ -135,6 +154,7 @@
                                         });
                                 }
                         });
+                        $("#addbtn").text("Add Product");
                 }
                 else if(addbtntext=="Update Product"){
                     $.ajax({
@@ -151,6 +171,7 @@
                             Swal.fire({title:"Error",text:error.message,icon:'error',confirmButtonText:"Close"});
                         }
                     });
+                    $("#addbtn").text("Add Product");
                 }
         });
 
@@ -197,6 +218,11 @@
                                 });
                             }
                     });
+                    if(name==$("#Productname").val())
+                    {
+                        $("#addbtn").text("Add Product");
+                        Clear();
+                    }
         });
         // for edit button
         $(document).on('click','.btn-info',function(e){
