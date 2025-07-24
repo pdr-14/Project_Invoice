@@ -119,7 +119,28 @@ def editproduct(request):
             return JsonResponse({"status":"error","message":f"Product {name} is not found"})
     else:
         return JsonResponse({"status":"error","message":"Invalid request method."})
-    
+@require_http_methods(["GET", "POST"])
+def searchproduct(request):
+    if request.method=="GET":
+        productname=request.GET.get('name')
+        print("Product Name:",productname)
+        if productname == None:
+            product_details = Product.objects.all()
+            cardview = render_to_string('addproduct/productcard.html', {'productlist': product_details})
+            return JsonResponse({"status": "error", "message": "Please enter a valid product name.",'productlist': product_details, "html": cardview})
+        else:
+            print(productname)
+            try:
+                product=Product.objects.filter(name__icontains=productname)
+                print("Length",len(product))
+                product_details = list(product.values())
+                print(product_details)
+                cardview = render_to_string('addproduct/productcard.html', {'productlist': product_details})
+                return JsonResponse({"status": "success", 'productlist': product_details,"html": cardview})
+            except Product.DoesNotExist:
+                product_details = Product.objects.all()
+                cardview = render_to_string('addproduct/productcard.html', {'productlist': product_details})
+                return JsonResponse({"status": "error", "message": f"Product {productname} not found.",'productlist': product_details,"html":cardview})
 @require_http_methods(["GET","POST"])
 def addcustomer(request):
     return render(request,"addcustomer.html")

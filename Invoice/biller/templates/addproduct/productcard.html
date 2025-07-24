@@ -1,7 +1,7 @@
 {% load static %}
 <div class="d-flex justify-content-between">
-         <input type="text" class="form-control w-100 m-3" placeholder="Search products...">
-            <button class="btn btn-primary m-3">Search</button>
+         <input type="text" class="form-control w-100 m-3" id="searchproductinput" placeholder="Search products...">
+            <button class="btn btn-primary m-3" id="searchbtn">Search</button>
 </div>
 <div class="productlist" style="height: 360px; overflow: auto;">
 {%if productlist%}
