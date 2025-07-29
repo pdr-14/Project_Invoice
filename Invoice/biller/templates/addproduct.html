@@ -83,20 +83,33 @@
               
             </div>
         </div>  
-        <div class="model fade z-3" id="productmodel">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Product Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                    </div>
+        {% comment %} view product model {% endcomment %}
+        <div class="modal fade" tabindex="-1" role="dialog" id="productmodel">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                                <div class="modal-header">
+                                        <h5 class="modal-title">Product Details</h5>
+                                </div>
+                <div class="modal-body justify-content-center align-content-center">
+                        <div>
+                            <p>Productname:<label class="mx-2" id="modalproductname"></label></p>
+                            <p>HSN Code:<label class="mx-2" id="modalhsncode"></label></p>
+                            <p>Price:<label class="mx-2" id="modalproductprice"></label> Per <label id="modelunittype"></label></p>
+                            <p>GST:<label class"mx-2" id="modalgst"></label></p>
+                            <p>Stock:<label class="mx-2" id="modalstock"></label><div id="modalpiecescontainer" style="display:none;">Pieces:<label id="modalpieces"></label></div> </p>
+                            <p id="modalpiecesinpackets">Totalpieces:<label id="totalpieces" class="mx-2"></label></p>
+                        </div>
+                </div>
+                <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" data-dismiss="modal" onclick="closemodel()">Close</button>
+                </div>
                 </div>
             </div>
-        </div>
+            </div>
+
+
+
 <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
-<script src="{% static 'js/jquery-3.6.0.js' %}"></script>
 <script>
         function Clear()
         {
@@ -186,7 +199,59 @@
                     $("#addbtn").text("Add Product");
                 }
         });
+        //for view button
+        $(document).on('click','.btn-success',function(e){
+                e.preventDefault();
+                $("#productmodel").modal("show");
+                const name=$(this).data('name');
+                $.ajax({
+                    url: "{% url 'View Product' %}",
+                    type:"GET",
+                    data: {
+                                'name': name,
+                               
+                    },
+                 success: function (response) {
+                                         if(response.productlist.length!=0)
+                                         {
+                                            let units=response.productlist.unit;
+                                            $("#modalproductname").text(response.productlist.name);
+                                            $("#modalhsncode").text(response.productlist.hsn);
+                                            $("#modalproductprice").text(response.productlist.price);
+                                            $("#modalgst").text(response.productlist.gst+" %");
+                                            $("#modelunittype").text(units);
+                                            $("#modalstock").text(response.productlist.stock+" "+units.charAt(0).toUpperCase()+units.slice(1))
+                                            if(units.toLowerCase()=="packets")
+                                            {
+                                                $("#modalpiecesinpackets").show();
+                                                $("#totalpieces").text(response.productlist.pieces_in_packets+ " Pieces");
+                                               let reaming=response.productlist.remaing;
+                                               if (parseInt(reaming)>0)
+                                               {
+                                                 $("#modalpiecescontainer").show();
+                                                 $("#modalpieces").text(reaming+ " Pieces")
+                                               }
+                                               else{
+                                                $("#modalpiecescontainer").hide();
+                                               }
 
+                                            }
+                                            else{
+                                                 $("#modalpiecesinpackets").hide();
+                                            }
+                                         }
+                                    },
+                                    error: function (xhr, status, error) {
+                                        Swal.fire({
+                                            title: 'Error',
+                                            text: error.message,
+                                            icon: 'error',
+                                            confirmButtonText: 'OK'
+                                        });
+                                    }
+                                });
+                    
+        });
         //for deletion button
         $(document).on('click','.btn-danger',function(e){
                     e.preventDefault();
@@ -314,7 +379,7 @@
     }
     $(document).on("click", "#searchbtn", function (e) {
     e.preventDefault();
-    $("#productmodel").modal("show");
+    
     searchProducts();
 });
 
@@ -330,6 +395,9 @@ $(document).on("keydown", "#searchproductinput", function(e) {
         searchProducts(); 
     }
 });
-
+ function closemodel()
+ {
+    $("#productmodel").modal("hide");
+ }
 </script>
 {%endblock%}

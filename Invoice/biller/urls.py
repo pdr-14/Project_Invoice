@@ -8,6 +8,7 @@ urlpatterns = [
     path('addcustomer/',views.addcustomer,name="Add Customer"),
     path('editproduct/',views.editproduct,name="Edit Product"),
     path('searchproduct/',views.searchproduct,name="Search Product"),
+    path("viewproduct/",views.viewproduct,name="View Product"),
     path('Login/',views.login,name="Login")    
     # Add more URL patterns as needed
 ]
